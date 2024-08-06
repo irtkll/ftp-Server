@@ -131,11 +131,19 @@ void *控制连接(void *num1)
 
         if (!strcmp(字符串数[0], "user"))
         {
-            if (!strcmp(字符串数[1], "anonymous"))
+            if (!strcmp(字符串数[1], "anonymous") || !strcmp(字符串数[1], ".."))
             {
-                if (send(*(int *)num1, "331 adawdawd3\r\n", 15, 0) == -1)
+                if (send(*(int *)num1, "331  用户名正确\r\n", 15, 0) == -1)
                 {
-                    perror("控制端口发送错误（331 adawdawd3\r\n）");
+                    perror("控制端口发送错误（331 用户名正确\r\n）");
+                    break;
+                }
+            }
+            else
+            {
+                if (send(*(int *)num1, "501 用户名错误\r\n", 15, 0) == -1)
+                {
+                    perror("控制端口发送错误（501 用户名错误\r\n）");
                     break;
                 }
             }
