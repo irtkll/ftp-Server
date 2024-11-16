@@ -29,29 +29,29 @@
 //     XImage *image;
 //     int datalen;
 // };
-struct csljcs
+struct 传输连接参数
 {
     int sock;
-    int csms;
-    int *cssfzd;
-    char *csnr;
-    char cslx[2];
-    char dqgzml[256];
-    int dqgzmllen;
-    struct sockaddr_in csd;
-    int csdlen;
-    // char wjm[100];
+    int 传输模式;
+    int *传输是否中断;
+    char *传输内容;
+    char 传输类型[2];
+    char 当前工作目录[256];
+    int 当前工作目录len;
+    struct sockaddr_in 传输端;
+    int 传输端len;
+    // char 文件名[100];
 };
-void *cslj(void *num1)
+void *传输连接(void *num1)
 {
-    printf("进入cslj\n");
-    struct csljcs *num = num1;
+    printf("进入传输连接\n");
+    struct 传输连接参数 *num = num1;
     int sock3;
-    if (num->csms)
+    if (num->传输模式)
     {
-        if ((sock3 = accept(num->sock, (struct sockaddr *)&num->csd, &num->csdlen)) == -1)
+        if ((sock3 = accept(num->sock, (struct sockaddr *)&num->传输端, &num->传输端len)) == -1)
         {
-            perror("csdkaccept()函数出错");
+            perror("传输端口accept()函数出错");
             goto end;
         }
     }
@@ -61,118 +61,118 @@ void *cslj(void *num1)
         if ((sock3 = socket(AF_INET, SOCK_STREAM, 0)) == -1)
         {
             perror("socket()函数出错\n");
-            printf("tccslj\n");
-            int fhz = 1;
-            pthread_exit(&fhz);
+            printf("退出传输连接\n");
+            int 返回值 = 1;
+            pthread_exit(&返回值);
         }
-        if (connect(sock3, (struct sockaddr *)&num->csd, num->csdlen) == -1)
+        if (connect(sock3, (struct sockaddr *)&num->传输端, num->传输端len) == -1)
         {
-            perror("csdkconnect()函数出错");
+            perror("传输端口connect()函数出错");
             goto end;
         }
     }
-    if (!strcmp(num->csnr, "stor"))
+    if (!strcmp(num->传输内容, "stor"))
     {
         char str[1024] = {0};
-        int recvfhz;
-        FILE *f = *num->cslx == 'I' ? fopen(num->dqgzml, "wb") : fopen(num->dqgzml, "wt");
+        int recv返回值;
+        FILE *f = *num->传输类型 == 'I' ? fopen(num->当前工作目录, "wb") : fopen(num->当前工作目录, "wt");
         if (!f)
         {
-            perror("wj打开sb");
+            perror("文件打开失败");
             goto end;
         }
         while (1)
         {
-            if ((recvfhz = recv(sock3, str, 1024, 0)) == -1)
+            if ((recv返回值 = recv(sock3, str, 1024, 0)) == -1)
             {
-                perror("csdkjscw");
+                perror("传输端口接收错误");
                 break;
             }
-            else if (!recvfhz)
+            else if (!recv返回值)
             {
-                printf("wjcswc\n");
+                printf("文件传输完成\n");
                 break;
             }
-            if (recvfhz == 1024)
+            if (recv返回值 == 1024)
             {
-                printf("wjcsz: %d\n", recvfhz);
+                printf("文件传输中: %d\n", recv返回值);
                 fwrite(str, 1024, 1, f);
             }
             else
-                fwrite(str, recvfhz, 1, f);
+                fwrite(str, recv返回值, 1, f);
         }
         fclose(f);
     }
 
-    if (!strcmp(num->csnr, "retr"))
+    if (!strcmp(num->传输内容, "retr"))
     {
-    // char wjlj[256] = {0};
-    // if (num->dqgzml[num->dqgzmllen - 1] == '/')
+    // char 文件路径[256] = {0};
+    // if (num->当前工作目录[num->当前工作目录len - 1] == '/')
     // {
-    //     sprintf(wjlj, "%s%s", num->dqgzml, num->wjm);
+    //     sprintf(文件路径, "%s%s", num->当前工作目录, num->文件名);
     // }
     // else
     // {
-    //     sprintf(wjlj, "%s/%s", num->dqgzml, num->wjm);
+    //     sprintf(文件路径, "%s/%s", num->当前工作目录, num->文件名);
     // }
+    文件传输:
         char str[1024] = {0};
-        FILE *f = *num->cslx == 'I' ? fopen(num->dqgzml, "rb") : fopen(num->dqgzml, "rt");
-    wjcs:
+        FILE *f = *num->传输类型 == 'I' ? fopen(num->当前工作目录, "rb") : fopen(num->当前工作目录, "rt");
         if (!f)
         {
-            printf("%s\n", num->dqgzml);
-            perror("wj打开sb");
+            printf("%s\n", num->当前工作目录);
+            perror("文件打开失败");
             goto end;
         }
         fseek(f, 0, SEEK_END);
-        unsigned wjdx = ftell(f);
+        unsigned 文件大小 = ftell(f);
         fseek(f, 0, SEEK_SET);
-        printf("wjdx为%d\n", wjdx);
-        for (int i = 0; i < wjdx; i += 1024)
+        printf("文件大小为%d\n", 文件大小);
+        for (int i = 0; i < 文件大小; i += 1024)
         {
-            if (wjdx - i < 1024)
+            if (文件大小 - i < 1024)
             {
-                fread(str, wjdx - i, 1, f);
-                if (send(sock3, str, wjdx - i, 0) == -1)
+                fread(str, 文件大小 - i, 1, f);
+                if (send(sock3, str, 文件大小 - i, 0) == -1)
                 {
-                    perror("csdk数据fscw");
+                    perror("传输端口数据发送错误");
                     break;
                 }
-                printf("yfs%dzj\n", wjdx - i);
+                printf("已发送%d字节\n", 文件大小 - i);
             }
             else
             {
                 fread(str, 1024, 1, f);
                 if (send(sock3, str, 1024, 0) == -1)
                 {
-                    perror("csdk数据fscw");
+                    perror("传输端口数据发送错误");
                     break;
                 }
-                printf("yfs%dzj\n", 1024);
+                printf("已发送%d字节\n", 1024);
             }
         }
         // sleep(1);
     }
-    else if (!strcmp(num->csnr, "list"))
+    else if (!strcmp(num->传输内容, "list"))
     {
-        DIR *dir = opendir(num->dqgzml);
+        DIR *dir = opendir(num->当前工作目录);
         if (!dir)
         {
-            perror("打开ml出错");
-            printf("%s\n", num->dqgzml);
+            perror("打开目录出错");
+            printf("%s\n", num->当前工作目录);
             goto end;
             // closedir(dir);
-            // goto wjcs;
+            // goto 文件传输;
         }
         struct dirent *entry;
         while (entry = readdir(dir))
         {
-            sprintf(&num->dqgzml[num->dqgzmllen], "/%s\0", entry->d_name);
-            struct stat zt;
-            if (stat(num->dqgzml, &zt))
+            sprintf(&num->当前工作目录[num->当前工作目录len], "/%s\0", entry->d_name);
+            struct stat 状态;
+            if (stat(num->当前工作目录, &状态))
             {
-                perror("zt读取出错");
-                printf("%s\n", num->dqgzml);
+                perror("状态读取出错");
+                printf("%s\n", num->当前工作目录);
                 continue;
             }
             if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
@@ -181,510 +181,510 @@ void *cslj(void *num1)
             }
 
             char str[256] = {0};
-            str[0] = (zt.st_mode & 0040000) ? 'd' : '-'; // wj类型：ml或普通wj
-            str[1] = (zt.st_mode & S_IRUSR) ? 'r' : '-'; // 用户读权限
-            str[2] = (zt.st_mode & S_IWUSR) ? 'w' : '-'; // 用户写权限
-            str[3] = (zt.st_mode & S_IXUSR) ? 'x' : '-'; // 用户zx权限
-            str[4] = (zt.st_mode & S_IRGRP) ? 'r' : '-'; // z读权限
-            str[5] = (zt.st_mode & S_IWGRP) ? 'w' : '-'; // z写权限
-            str[6] = (zt.st_mode & S_IXGRP) ? 'x' : '-'; // zzx权限
-            str[7] = (zt.st_mode & S_IROTH) ? 'r' : '-'; // 其他用户读权限
-            str[8] = (zt.st_mode & S_IWOTH) ? 'w' : '-'; // 其他用户写权限
-            str[9] = (zt.st_mode & S_IXOTH) ? 'x' : '-'; // 其他用户zx权限
+            str[0] = (状态.st_mode & 0040000) ? 'd' : '-'; // 文件类型：目录或普通文件
+            str[1] = (状态.st_mode & S_IRUSR) ? 'r' : '-'; // 用户读权限
+            str[2] = (状态.st_mode & S_IWUSR) ? 'w' : '-'; // 用户写权限
+            str[3] = (状态.st_mode & S_IXUSR) ? 'x' : '-'; // 用户执行权限
+            str[4] = (状态.st_mode & S_IRGRP) ? 'r' : '-'; // 组读权限
+            str[5] = (状态.st_mode & S_IWGRP) ? 'w' : '-'; // 组写权限
+            str[6] = (状态.st_mode & S_IXGRP) ? 'x' : '-'; // 组执行权限
+            str[7] = (状态.st_mode & S_IROTH) ? 'r' : '-'; // 其他用户读权限
+            str[8] = (状态.st_mode & S_IWOTH) ? 'w' : '-'; // 其他用户写权限
+            str[9] = (状态.st_mode & S_IXOTH) ? 'x' : '-'; // 其他用户执行权限
             str[10] = ' ';
-            sprintf(&str[11], "%d ", zt.st_nlink);
-            struct passwd *ssyh = getpwuid(zt.st_uid);
-            struct group *ssyhz = getgrgid(zt.st_gid);
-            sprintf(&str[strlen(str)], "%s ", ssyh->pw_name);
-            sprintf(&str[strlen(str)], "%s ", ssyhz->gr_name);
-            sprintf(&str[strlen(str)], "%d ", zt.st_size);
-            strftime(&str[strlen(str)], 30, "%b %d %H:%M ", localtime(&zt.st_mtime));
+            sprintf(&str[11], "%d ", 状态.st_nlink);
+            struct passwd *所属用户 = getpwuid(状态.st_uid);
+            struct group *所属用户组 = getgrgid(状态.st_gid);
+            sprintf(&str[strlen(str)], "%s ", 所属用户->pw_name);
+            sprintf(&str[strlen(str)], "%s ", 所属用户组->gr_name);
+            sprintf(&str[strlen(str)], "%d ", 状态.st_size);
+            strftime(&str[strlen(str)], 30, "%b %d %H:%M ", localtime(&状态.st_mtime));
             sprintf(&str[strlen(str)], "%s", entry->d_name);
             sprintf(&str[strlen(str)], "\r\n");
             if (send(sock3, str, strlen(str), 0) == -1)
             {
-                perror("csdk数据cs出错");
+                perror("传输端口数据传输出错");
                 break;
             }
         }
         closedir(dir);
     }
 end:
-    // if (num->csms)
+    // if (num->传输模式)
     // {
     close(sock3);
     // }
-    printf("tccslj\n");
-    int fhz = 1;
-    pthread_exit(&fhz);
+    printf("退出传输连接\n");
+    int 返回值 = 1;
+    pthread_exit(&返回值);
 }
-void *kzlj(void *num1)
+void *控制连接(void *num1)
 {
     int sock = (int)num1;
-    printf("进入kzlj\n");
-    struct sockaddr_in csd;
-    csd.sin_addr.s_addr = INADDR_ANY;
-    csd.sin_port = htons(0 /*(*(((struct num *)num1)->dk数))*/);
-    csd.sin_family = AF_INET;
-    int csdlen = sizeof(csd);
-    int csms = 0;
-    int jsxh = 0;
+    printf("进入控制连接\n");
+    struct sockaddr_in 传输端;
+    传输端.sin_addr.s_addr = INADDR_ANY;
+    传输端.sin_port = htons(0 /*(*(((struct num *)num1)->端口数))*/);
+    传输端.sin_family = AF_INET;
+    int 传输端len = sizeof(传输端);
+    int 传输模式 = 0;
+    int 结束循环 = 0;
     int sock2;
-    char *dqgzml = getcwd(NULL, 1024);
-    char cslx[2] = {0};
+    char *当前工作目录 = getcwd(NULL, 1024);
+    char 传输类型[2] = {0};
     char s[100] = {0};
-    char **zfcs = calloc(0, 0);
+    char **字符串数 = calloc(0, 0);
     if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
-        perror("csdk套接字cj出错(if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1))");
+        perror("传输端口套接字创建出错（if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1)）");
         close(sock);
-        printf("tckzlj\n");
-        int fhz = 0;
-        pthread_exit(&fhz);
+        printf("退出控制连接\n");
+        int 返回值 = 0;
+        pthread_exit(&返回值);
     }
     if (send(sock, "220 asdsad\r\n" /* Service ready for new user\n*/, 12, 0) == -1)
     {
-        perror("kzdkfscw(220 asdsad\r\n)");
+        perror("控制端口发送错误（220 asdsad\r\n）");
         close(sock);
         close(sock2);
-        printf("tckzlj\n");
-        int fhz = 0;
-        pthread_exit(&fhz);
+        printf("退出控制连接\n");
+        int 返回值 = 0;
+        pthread_exit(&返回值);
     }
-    while (!jsxh)
+    while (!结束循环)
     {
-        int recvfhz = recv(sock, s, 100, 0);
-        if (recvfhz == -1)
+        int recv返回值 = recv(sock, s, 100, 0);
+        if (recv返回值 == -1)
         {
-            perror("kzdkjscw( int recvfhz = recv(*(int*)num1, s, 100, 0);)");
+            perror("控制端口接收错误（ int recv返回值 = recv(*(int*)num1, s, 100, 0);）");
             break;
         }
-        else if (recvfhz == 0)
+        else if (recv返回值 == 0)
         {
-            printf("ljdk\n");
+            printf("连接断开\n");
             break;
         }
-        int mlcss = 0;
+        int 命令参数数 = 0;
         for (int i = -1, z = 1, c = 1; s[i] != '\n' && s[i] != '\r'; z++)
         {
             i++;
-            char *zfc = calloc(1, 2);
+            char *字符串 = calloc(1, 2);
             for (int j = 0; s[i] != ' ' && s[i] != '\n' && s[i] != '\r' && c; j++, i++)
             {
-                if (zfc[j] == '"')
+                if (字符串[j] == '"')
                     ~c;
-                zfc = realloc(zfc, j + 2);
-                zfc[j] = s[i];
-                zfc[j + 1] = 0;
+                字符串 = realloc(字符串, j + 2);
+                字符串[j] = s[i];
+                字符串[j + 1] = 0;
             }
-            zfcs = realloc(zfcs, sizeof(char *) * z);
-            zfcs[z - 1] = zfc;
-            mlcss = z;
-            // num[0]=zfc;
-            // free(zfc);
+            字符串数 = realloc(字符串数, sizeof(char *) * z);
+            字符串数[z - 1] = 字符串;
+            命令参数数 = z;
+            // num[0]=字符串;
+            // free(字符串);
         }
-        // zfcs内存是否y释放 = 0;
+        // 字符串数内存是否已释放 = 0;
         // return 0;
-        // zfc小写转换
-        for (int i = 0; i < strlen(zfcs[0]); i++)
+        // 字符串小写转换
+        for (int i = 0; i < strlen(字符串数[0]); i++)
         {
-            zfcs[0][i] = tolower(zfcs[0][i]);
+            字符串数[0][i] = tolower(字符串数[0][i]);
         }
 
-        if (!strcmp(zfcs[0], "user"))
+        if (!strcmp(字符串数[0], "user"))
         {
-            if (!strcmp(zfcs[1], "anonymous") || !strcmp(zfcs[1], ".."))
+            if (!strcmp(字符串数[1], "anonymous") || !strcmp(字符串数[1], ".."))
             {
-                if (send(sock, "331  yhmzq\r\n", 22, 0) == -1)
+                if (send(sock, "331  用户名正确\r\n", 22, 0) == -1)
                 {
-                    perror("kzdkfscw(331 yhmzq\r\n)");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("控制端口发送错误（331 用户名正确\r\n）");
+                    结束循环 = 1;
+                    goto 循环末尾;
                 }
             }
             else
             {
-                if (send(sock, "501 yhmcw\r\n", 21, 0) == -1)
+                if (send(sock, "501 用户名错误\r\n", 21, 0) == -1)
                 {
-                    perror("kzdkfscw(501 yhmcw\r\n)");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("控制端口发送错误（501 用户名错误\r\n）");
+                    结束循环 = 1;
+                    goto 循环末尾;
                 }
             }
         }
-        else if (!strcmp(zfcs[0], "pass"))
+        else if (!strcmp(字符串数[0], "pass"))
         {
             if (send(sock, "230 fgdf\r\n", 10, 0) == -1)
             {
-                perror("kzdkfscw(230 fgdf\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（230 fgdf\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
         }
 
-        else if (!strcmp(zfcs[0], "syst"))
+        else if (!strcmp(字符串数[0], "syst"))
         {
             if (send(sock, "215 UNIX type:L8\r\n", 18, 0) == -1)
             {
-                perror("kzdkfscw(215 UNIX type:L8\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（215 UNIX type:L8\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
         }
-        else if (!strcmp(zfcs[0], "pwd"))
+        else if (!strcmp(字符串数[0], "pwd"))
         {
-            // getcwd(dqgzml, 1024);
-            char hfzfc[300] = {0};
-            memcpy(hfzfc, "257 ", 4);
-            sprintf(&hfzfc[4], "\"%s\"\r\n", dqgzml);
-            if (send(sock, hfzfc, strlen(hfzfc), 0) == -1)
+            // getcwd(当前工作目录, 1024);
+            char 回复字符串[300] = {0};
+            memcpy(回复字符串, "257 ", 4);
+            sprintf(&回复字符串[4], "\"%s\"\r\n", 当前工作目录);
+            if (send(sock, 回复字符串, strlen(回复字符串), 0) == -1)
             {
-                perror("kzdkfscw pwd");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误 pwd");
+                结束循环 = 1;
+                goto 循环末尾;
             }
-            // printf("释放hfzfc内存\n");
-            // free(hfzfc);
+            // printf("释放回复字符串内存\n");
+            // free(回复字符串);
         }
-        else if (!strcmp(zfcs[0], "cdup"))
+        else if (!strcmp(字符串数[0], "cdup"))
         {
-            char dqgzmlnum[1024] = {0};
-            char ml[550] = {0};
-            sprintf(ml, "cd \"%s\" && cd .. && pwd", dqgzml);
-            printf("zxml：%s\n", ml);
-            FILE *f = popen(ml, "r");
+            char 当前工作目录num[1024] = {0};
+            char 命令[550] = {0};
+            sprintf(命令, "cd \"%s\" && cd .. && pwd", 当前工作目录);
+            printf("执行命令：%s\n", 命令);
+            FILE *f = popen(命令, "r");
             if (!f)
             {
-                perror("cdup popenzxmlsb");
+                perror("cdup popen执行命令失败");
                 if (send(sock, "550 adaseasdas\r\n", 16, 0) == -1)
                 {
-                    perror("cdup kzdkfscw(550 adaseasdas\r\n)");
-                    jsxh = 1;
+                    perror("cdup 控制端口发送错误（550 adaseasdas\r\n）");
+                    结束循环 = 1;
                 }
-                goto xhmw;
+                goto 循环末尾;
             }
             // fseek(f, 0, SEEK_END);
-            // unsigned wjdx = ftell(f);
+            // unsigned 文件大小 = ftell(f);
             // fseek(f, 0, SEEK_SET);
-            if (!fgets(dqgzmlnum, 1024, f))
+            if (!fgets(当前工作目录num, 1024, f))
             {
-                printf("cdup zxmlsb\n");
+                printf("cdup 执行命令失败\n");
                 if (send(sock, "550 Requested file action okay, completed.\r\n", 44, 0) == -1)
                 {
-                    perror("cdup kzdkfscw(550 Requested file action okay, completed.\r\n)");
-                    jsxh = 1;
+                    perror("cdup 控制端口发送错误（550 Requested file action okay, completed.\r\n）");
+                    结束循环 = 1;
                 }
                 fclose(f);
-                goto xhmw;
+                goto 循环末尾;
             }
-            dqgzmlnum[strlen(dqgzmlnum) - 1] = '\0';
-            strcpy(dqgzml, dqgzmlnum);
-            printf("dqgzml：%s\n", dqgzml);
+            当前工作目录num[strlen(当前工作目录num) - 1] = '\0';
+            strcpy(当前工作目录, 当前工作目录num);
+            printf("当前工作目录：%s\n", 当前工作目录);
             fclose(f);
             if (send(sock, "250 adaseasdas\r\n", 16, 0) == -1)
             {
-                perror("kzdkfscw(250 adaseasdas\r\n)");
-                jsxh = 1;
+                perror("控制端口发送错误（250 adaseasdas\r\n）");
+                结束循环 = 1;
             }
-            // getcwd(dqgzml, 1024);
+            // getcwd(当前工作目录, 1024);
 
             // else
             // {
             //     if (send(sock, "550 sdfa\r\n", 10, 0) == -1)
             //     {
-            //         perror("kzdkfscw(550 sdfa\r\n)");
-            //                         jsxh = 1;
-            // goto xhmw;;
+            //         perror("控制端口发送错误（550 sdfa\r\n）");
+            //                         结束循环 = 1;
+            // goto 循环末尾;;
             //     }
             // }
         }
-        else if (!strcmp(zfcs[0], "rmd"))
+        else if (!strcmp(字符串数[0], "rmd"))
         {
-            char lj[1024] = {0};
-            if (zfcs[1][0] != '/')
+            char 路径[1024] = {0};
+            if (字符串数[1][0] != '/')
             {
-                sprintf(lj, "%s/", dqgzml);
+                sprintf(路径, "%s/", 当前工作目录);
             }
-            strcpy(&lj[strlen(lj)], zfcs[1]);
-            for (int j = 2; j < mlcss; j++)
+            strcpy(&路径[strlen(路径)], 字符串数[1]);
+            for (int j = 2; j < 命令参数数; j++)
             {
-                sprintf(&lj[strlen(lj)], " %s", zfcs[j]);
+                sprintf(&路径[strlen(路径)], " %s", 字符串数[j]);
             }
-            if (rmdir(lj))
+            if (rmdir(路径))
             {
-                printf("scmlsb\n");
-                if (send(sock, "450 scmlsb\r\n", 24, 0))
+                printf("删除目录失败\n");
+                if (send(sock, "450 删除目录失败\r\n", 24, 0))
                 {
-                    perror("kzdkfscw(450 scmlsb\r\n)");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("控制端口发送错误（450 删除目录失败\r\n）");
+                    结束循环 = 1;
+                    goto 循环末尾;
                 }
             }
-            if (send(sock, "250 qqdwjczcgwc\r\n", 39, 0) == -1)
+            if (send(sock, "250 请求的文件操作成功完成\r\n", 39, 0) == -1)
             {
-                perror("kzdkfscw(250 qqdwjczcgwc)");
-                jsxh = 1;
+                perror("控制端口发送错误（250 请求的文件操作成功完成）");
+                结束循环 = 1;
             }
-            printf("scml：%s\n", lj);
+            printf("删除目录：%s\n", 路径);
         }
-        else if (!strcmp(zfcs[0], "mkd"))
+        else if (!strcmp(字符串数[0], "mkd"))
         {
-            char lj[1024] = {0};
-            if (zfcs[1][0] != '/')
+            char 路径[1024] = {0};
+            if (字符串数[1][0] != '/')
             {
-                sprintf(lj, "%s/", dqgzml);
+                sprintf(路径, "%s/", 当前工作目录);
             }
-            strcpy(&lj[strlen(lj)], zfcs[1]);
-            for (int j = 2; j < mlcss; j++)
+            strcpy(&路径[strlen(路径)], 字符串数[1]);
+            for (int j = 2; j < 命令参数数; j++)
             {
-                sprintf(&lj[strlen(lj)], " %s", zfcs[j]);
+                sprintf(&路径[strlen(路径)], " %s", 字符串数[j]);
             }
 
-            if (mkdir(lj, 0777))
+            if (mkdir(路径, 0777))
             {
-                printf("cjmlsb\n");
-                if (send(sock, "550 cjmlsb\r\n", 24, 0))
+                printf("创建目录失败\n");
+                if (send(sock, "550 创建目录失败\r\n", 24, 0))
                 {
-                    perror("kzdkfscw(550 cjmlsb\r\n)");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("控制端口发送错误（550 创建目录失败\r\n）");
+                    结束循环 = 1;
+                    goto 循环末尾;
                 }
             }
-            char hfzfc[300] = {0};
-            memcpy(hfzfc, "257 ", 4);
-            sprintf(&hfzfc[4], "\"%s\"\r\n", lj);
-            if (send(sock, hfzfc, strlen(hfzfc), 0) == -1)
+            char 回复字符串[300] = {0};
+            memcpy(回复字符串, "257 ", 4);
+            sprintf(&回复字符串[4], "\"%s\"\r\n", 路径);
+            if (send(sock, 回复字符串, strlen(回复字符串), 0) == -1)
             {
-                perror("kzdkfscw mkd");
-                jsxh = 1;
+                perror("控制端口发送错误 mkd");
+                结束循环 = 1;
             }
-            printf("cjmlcg\n");
+            printf("创建目录成功\n");
         }
-        else if (!strcmp(zfcs[0], "dele"))
+        else if (!strcmp(字符串数[0], "dele"))
         {
-            char wjm[1024] = {0};
-            if (zfcs[1][0] != '/')
+            char 文件名[1024] = {0};
+            if (字符串数[1][0] != '/')
             {
-                sprintf(wjm, "%s/", dqgzml);
+                sprintf(文件名, "%s/", 当前工作目录);
             }
-            strcpy(&wjm[strlen(wjm)], zfcs[1]);
-            for (int j = 2; j < mlcss; j++)
+            strcpy(&文件名[strlen(文件名)], 字符串数[1]);
+            for (int j = 2; j < 命令参数数; j++)
             {
-                sprintf(&wjm[strlen(wjm)], " %s", zfcs[j]);
+                sprintf(&文件名[strlen(文件名)], " %s", 字符串数[j]);
             }
-            if (remove(wjm) == -1)
+            if (remove(文件名) == -1)
             {
-                printf("scwjsb: %s\n", wjm);
+                printf("删除文件失败: %s\n", 文件名);
                 if (errno == ENOENT)
                 {
                     if (send(sock, "550 File not found.\r\n", 21, 0))
                     {
-                        perror("kzdkfscw(550 scwjsb\r\n)");
-                        jsxh = 1;
-                        goto xhmw;
+                        perror("控制端口发送错误（550 删除文件失败\r\n）");
+                        结束循环 = 1;
+                        goto 循环末尾;
                     }
                 }
                 else if (errno == EPERM)
                 {
                     if (send(sock, "550 Permission denied.\r\n", 24, 0))
                     {
-                        perror("kzdkfscw(550 Permission denied.\r\n)");
-                        jsxh = 1;
-                        goto xhmw;
+                        perror("控制端口发送错误（550 Permission denied.\r\n）");
+                        结束循环 = 1;
+                        goto 循环末尾;
                     }
                 }
                 else
                 {
-                    printf("scwjsb，未知cw\n");
+                    printf("删除文件失败，未知错误\n");
                     if (send(sock, "550 Unknown error.\r\n", 21, 0))
                     {
-                        perror("kzdkfscw(550 Unknown error.\r\n)");
-                        jsxh = 1;
-                        goto xhmw;
+                        perror("控制端口发送错误（550 Unknown error.\r\n）");
+                        结束循环 = 1;
+                        goto 循环末尾;
                     }
                 }
             }
-            else if (send(sock, "250 mlzxcg\r\n", 24, 0) == -1)
+            else if (send(sock, "250 命令执行成功\r\n", 24, 0) == -1)
             {
-                perror("kzdkfscw(250 mlzxcg\r\n)");
-                jsxh = 1;
+                perror("控制端口发送错误（250 命令执行成功\r\n）");
+                结束循环 = 1;
             }
         }
-        else if (!strcmp(zfcs[0], "stor"))
+        else if (!strcmp(字符串数[0], "stor"))
         {
-            pthread_t xcID;
-            struct csljcs cs = {0};
-            cs.sock = sock2;
-            cs.csnr = zfcs[0];
-            cs.cssfzd = 0;
-            cs.csms = csms;
-            strcpy(cs.cslx, cslx);
-            if (zfcs[1][0] != '/')
+            pthread_t 线程ID;
+            struct 传输连接参数 参数 = {0};
+            参数.sock = sock2;
+            参数.传输内容 = 字符串数[0];
+            参数.传输是否中断 = 0;
+            参数.传输模式 = 传输模式;
+            strcpy(参数.传输类型, 传输类型);
+            if (字符串数[1][0] != '/')
             {
-                if (dqgzml[strlen(dqgzml) - 1] == '/')
+                if (当前工作目录[strlen(当前工作目录) - 1] == '/')
                 {
-                    sprintf(cs.dqgzml, "%s", dqgzml);
+                    sprintf(参数.当前工作目录, "%s", 当前工作目录);
                 }
                 else
-                    sprintf(cs.dqgzml, "%s/", dqgzml);
+                    sprintf(参数.当前工作目录, "%s/", 当前工作目录);
             }
-            sprintf(&cs.dqgzml[strlen(cs.dqgzml)], "/%s", zfcs[1]);
-            for (int j = 2; j < mlcss; j++)
+            sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], "/%s", 字符串数[1]);
+            for (int j = 2; j < 命令参数数; j++)
             {
-                sprintf(&cs.dqgzml[strlen(cs.dqgzml)], " %s", zfcs[j]);
+                sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], " %s", 字符串数[j]);
             }
-            cs.dqgzmllen = strlen(cs.dqgzml);
-            cs.csd = csd;
-            cs.csdlen = csdlen;
-            pthread_create(&xcID, NULL, cslj, &cs);
+            参数.当前工作目录len = strlen(参数.当前工作目录);
+            参数.传输端 = 传输端;
+            参数.传输端len = 传输端len;
+            pthread_create(&线程ID, NULL, 传输连接, &参数);
             if (send(sock, "125 File status okay; about to open data connection.\r\n", 54, 0) == -1)
             {
-                perror("kzdkfscw(125 File status okay; about to open data connection.\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（125 File status okay; about to open data connection.\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
-            pthread_join(xcID, NULL);
+            pthread_join(线程ID, NULL);
             if (send(sock, "226 Transfer complete.\r\n", 24, 0) == -1)
             {
-                perror("kzdkfscw(226 Transfer complete.\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（226 Transfer complete.\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
         }
-        else if (!strcmp(zfcs[0], "retr"))
+        else if (!strcmp(字符串数[0], "retr"))
         {
-            pthread_t xcID;
-            struct csljcs cs = {0};
-            cs.sock = sock2;
-            cs.csnr = zfcs[0];
-            cs.cssfzd = 0;
-            cs.csms = csms;
-            strcpy(cs.cslx, cslx);
-            if (zfcs[1][0] != '/')
+            pthread_t 线程ID;
+            struct 传输连接参数 参数 = {0};
+            参数.sock = sock2;
+            参数.传输内容 = 字符串数[0];
+            参数.传输是否中断 = 0;
+            参数.传输模式 = 传输模式;
+            strcpy(参数.传输类型, 传输类型);
+            if (字符串数[1][0] != '/')
             {
-                if (dqgzml[strlen(dqgzml) - 1] == '/')
+                if (当前工作目录[strlen(当前工作目录) - 1] == '/')
                 {
-                    sprintf(cs.dqgzml, "%s", dqgzml);
+                    sprintf(参数.当前工作目录, "%s", 当前工作目录);
                 }
                 else
-                    sprintf(cs.dqgzml, "%s/", dqgzml);
+                    sprintf(参数.当前工作目录, "%s/", 当前工作目录);
             }
-            sprintf(&cs.dqgzml[strlen(cs.dqgzml)], "%s", zfcs[1]);
-            for (int j = 2; j < mlcss; j++)
+            sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], "%s", 字符串数[1]);
+            for (int j = 2; j < 命令参数数; j++)
             {
-                sprintf(&cs.dqgzml[strlen(cs.dqgzml)], " %s", zfcs[j]);
+                sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], " %s", 字符串数[j]);
             }
-            cs.dqgzmllen = strlen(cs.dqgzml);
-            cs.csd = csd;
-            cs.csdlen = csdlen;
-            pthread_create(&xcID, NULL, cslj, &cs);
+            参数.当前工作目录len = strlen(参数.当前工作目录);
+            参数.传输端 = 传输端;
+            参数.传输端len = 传输端len;
+            pthread_create(&线程ID, NULL, 传输连接, &参数);
             if (send(sock, "125 File status okay; about to open data connection.\r\n", 54, 0) == -1)
             {
-                perror("kzdkfscw(125 File status okay; about to open data connection.\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（125 File status okay; about to open data connection.\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
-            pthread_join(xcID, NULL);
+            pthread_join(线程ID, NULL);
             if (send(sock, "226 Transfer complete.\r\n", 24, 0) == -1)
             {
-                perror("kzdkfscw(226 Transfer complete.\r\n)");
-                jsxh = 1;
+                perror("控制端口发送错误（226 Transfer complete.\r\n）");
+                结束循环 = 1;
             }
         }
-        else if (!strcmp(zfcs[0], "cwd"))
+        else if (!strcmp(字符串数[0], "cwd"))
         {
-            char dqgzmlnum[1024] = {0};
-            char ml[550] = {0};
-            // if (zfcs[1][0] == '/')
+            char 当前工作目录num[1024] = {0};
+            char 命令[550] = {0};
+            // if (字符串数[1][0] == '/')
             // {
-            sprintf(ml, "cd \"%s\" && cd \"", dqgzml);
-            strcpy(&ml[strlen(ml)], zfcs[1]);
-            for (int j = 2; j < mlcss; j++)
+            sprintf(命令, "cd \"%s\" && cd \"", 当前工作目录);
+            strcpy(&命令[strlen(命令)], 字符串数[1]);
+            for (int j = 2; j < 命令参数数; j++)
             {
-                sprintf(&ml[strlen(ml)], " %s", zfcs[j]);
+                sprintf(&命令[strlen(命令)], " %s", 字符串数[j]);
             }
-            sprintf(&ml[strlen(ml)], "\" && pwd");
-            printf("ml：%s\n", ml);
-            FILE *f = popen(ml, "r");
+            sprintf(&命令[strlen(命令)], "\" && pwd");
+            printf("命令：%s\n", 命令);
+            FILE *f = popen(命令, "r");
             if (!f)
             {
-                perror("popen zxmlsb");
+                perror("popen 执行命令失败");
                 if (send(sock, "550 Requested file action okay, completed.\r\n", 44, 0) == -1)
                 {
-                    perror("kzdkfscw(250 Requested file action okay, completed.\r\n)");
-                    jsxh = 1;
+                    perror("控制端口发送错误（250 Requested file action okay, completed.\r\n）");
+                    结束循环 = 1;
                 }
-                goto xhmw;
+                goto 循环末尾;
             }
             // fseek(f, 0, SEEK_END);
-            // unsigned wjdx = ftell(f);
+            // unsigned 文件大小 = ftell(f);
             // fseek(f, 0, SEEK_SET);
-            if (!fgets(dqgzmlnum, 1024, f))
+            if (!fgets(当前工作目录num, 1024, f))
             {
-                printf("fgets zxmlsb\n");
+                printf("fgets 执行命令失败\n");
                 if (send(sock, "550 Requested file action okay, completed.\r\n", 44, 0) == -1)
                 {
-                    perror("kzdkfscw(550 Requested file action okay, completed.\r\n)");
-                    jsxh = 1;
+                    perror("控制端口发送错误（550 Requested file action okay, completed.\r\n）");
+                    结束循环 = 1;
                 }
                 fclose(f);
-                goto xhmw;
+                goto 循环末尾;
             }
-            dqgzmlnum[strlen(dqgzmlnum) - 1] = '\0';
-            strcpy(dqgzml, dqgzmlnum);
+            当前工作目录num[strlen(当前工作目录num) - 1] = '\0';
+            strcpy(当前工作目录, 当前工作目录num);
             fclose(f);
             // }
             // else
             // {
-            //     if (dqgzml[strlen(dqgzml) - 1] == '/')
-            //         sprintf(&dqgzml[strlen(dqgzml)], "%s", zfcs[1]);
+            //     if (当前工作目录[strlen(当前工作目录) - 1] == '/')
+            //         sprintf(&当前工作目录[strlen(当前工作目录)], "%s", 字符串数[1]);
             //     else
-            //         sprintf(&dqgzml[strlen(dqgzml)], "/%s", zfcs[1]);
-            //     for (int j = 2; j < mlcss; j++)
+            //         sprintf(&当前工作目录[strlen(当前工作目录)], "/%s", 字符串数[1]);
+            //     for (int j = 2; j < 命令参数数; j++)
             //     {
-            //         sprintf(&dqgzml[strlen(dqgzml)], " %s", zfcs[j]);
+            //         sprintf(&当前工作目录[strlen(当前工作目录)], " %s", 字符串数[j]);
             //     }
             // }
-            // chdir(dqgzml);
-            printf("dqgzml：%s\n", dqgzml);
+            // chdir(当前工作目录);
+            printf("当前工作目录：%s\n", 当前工作目录);
             if (send(sock, "250 Requested file action okay, completed.\r\n", 44, 0) == -1)
             {
-                perror("kzdkfscw(250 Requested file action okay, completed.\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（250 Requested file action okay, completed.\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
-            // if (chdir(zfcs[1]) == 0)
+            // if (chdir(字符串数[1]) == 0)
             // {
             //     if (send((int )num1, "250 adaseasdas\r\n", 16, 0) == -1)
             //     {
-            //         perror("kzdkfscw(250 adaseasdas\r\n)");
-            //                         jsxh = 1;
-            // goto xhmw;;
+            //         perror("控制端口发送错误（250 adaseasdas\r\n）");
+            //                         结束循环 = 1;
+            // goto 循环末尾;;
             //     }
-            //     getcwd(dqgzml, 1024);
+            //     getcwd(当前工作目录, 1024);
             // }
             // else
             // {
 
             //     // if (send((int )num1, "550 sdfa\r\n", 10, 0) == -1)
             //     // {
-            //     //     perror("kzdkfscw(550 sdfa\r\n)");
-            //     //                     jsxh = 1;
-            // goto xhmw;;
+            //     //     perror("控制端口发送错误（550 sdfa\r\n）");
+            //     //                     结束循环 = 1;
+            // goto 循环末尾;;
             //     // }
             // }
         }
-        else if (!strcmp(zfcs[0], "opts"))
+        else if (!strcmp(字符串数[0], "opts"))
         {
-            if (!strcmp(zfcs[1], "UTF8") || !strcmp(zfcs[1], "utf8"))
+            if (!strcmp(字符串数[1], "UTF8") || !strcmp(字符串数[1], "utf8"))
             {
-                if (!strcmp(zfcs[2], "ON") || !strcmp(zfcs[2], "on"))
+                if (!strcmp(字符串数[2], "ON") || !strcmp(字符串数[2], "on"))
                 {
-                    if (send(sock, "200 cg\r\n", 12, 0) == -1)
+                    if (send(sock, "200 成功\r\n", 12, 0) == -1)
                     {
-                        perror("kzdkfscw(200 cg\r\n)");
-                        jsxh = 1;
-                        goto xhmw;
+                        perror("控制端口发送错误（200 成功\r\n）");
+                        结束循环 = 1;
+                        goto 循环末尾;
                         ;
                     }
                 }
@@ -692,9 +692,9 @@ void *kzlj(void *num1)
                 {
                     if (send(sock, "504 sfas\r\n", 12, 0) == -1)
                     {
-                        perror("kzdkfscw(504asdf\r\n)");
-                        jsxh = 1;
-                        goto xhmw;
+                        perror("控制端口发送错误（504asdf\r\n）");
+                        结束循环 = 1;
+                        goto 循环末尾;
                         ;
                     }
                 }
@@ -703,245 +703,245 @@ void *kzlj(void *num1)
             {
                 if (send(sock, "504 sfas\r\n", 12, 0) == -1)
                 {
-                    perror("kzdkfscw(504asdf\r\n)");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("控制端口发送错误（504asdf\r\n）");
+                    结束循环 = 1;
+                    goto 循环末尾;
                     ;
                 }
             }
         }
-        else if (!strcmp(zfcs[0], "auth"))
+        else if (!strcmp(字符串数[0], "auth"))
         {
-            // if (!strcmp(zfcs[1], "SSL"))
+            // if (!strcmp(字符串数[1], "SSL"))
             // {
             //     if (send((int )num1, "234 dfrsdfast\r\n", 15, 0) == -1)
             //     {
-            //         perror("kzdkfscw(234 dfrsdfast\r\n)");
+            //         perror("控制端口发送错误（234 dfrsdfast\r\n）");
             //         break;
             //     }
             // }
             // else
             // {
-            if (send(sock, "504 cw\r\n", 12, 0) == -1)
+            if (send(sock, "504 错误\r\n", 12, 0) == -1)
             {
-                perror("kzdkfscw(504 cw\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（504 错误\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
                 ;
             }
             // }
         }
-        else if (!strcmp(zfcs[0], "type"))
+        else if (!strcmp(字符串数[0], "type"))
         {
-            cslx[0] = zfcs[1][0];
+            传输类型[0] = 字符串数[1][0];
             if (send(sock, "200 Command okay.\r\n", 19, 0) == -1)
             {
-                perror("kzdkfscw(200 Command okay.\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（200 Command okay.\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
         }
-        else if (!strcmp(zfcs[0], "size"))
+        else if (!strcmp(字符串数[0], "size"))
         {
             char str[50] = {0};
-            char wjlj[256] = {0};
-            if (zfcs[1][0] != '/')
+            char 文件路径[256] = {0};
+            if (字符串数[1][0] != '/')
             {
-                sprintf(wjlj, "%s/", dqgzml);
+                sprintf(文件路径, "%s/", 当前工作目录);
             }
-            strcpy(&wjlj[strlen(wjlj)], zfcs[1]);
-            for (int j = 2; j < mlcss; j++)
+            strcpy(&文件路径[strlen(文件路径)], 字符串数[1]);
+            for (int j = 2; j < 命令参数数; j++)
             {
-                sprintf(&wjlj[strlen(wjlj)], " %s", zfcs[j]);
+                sprintf(&文件路径[strlen(文件路径)], " %s", 字符串数[j]);
             }
-            FILE *f = fopen(wjlj, "rb");
+            FILE *f = fopen(文件路径, "rb");
             if (!f)
             {
-                printf("wj不存在:%s\n", wjlj);
-                if (send(sock, "550 wj不存在\r\n", 21, 0) == -1)
+                printf("文件不存在:%s\n", 文件路径);
+                if (send(sock, "550 文件不存在\r\n", 21, 0) == -1)
                 {
-                    perror("kzdkfscw(550 wj不存在\r\n)");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("控制端口发送错误（550 文件不存在\r\n）");
+                    结束循环 = 1;
+                    goto 循环末尾;
                 }
-                goto xhmw;
+                goto 循环末尾;
             }
 
             fseek(f, 0, SEEK_END);
             sprintf(str, "213 %ld\r\n", ftell(f));
             if (send(sock, str, strlen(str), 0) == -1)
             {
-                perror("kzdkfscw if (send((int )num1, str, strlen(str), 0) == -1)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误 if (send((int )num1, str, strlen(str), 0) == -1)");
+                结束循环 = 1;
+                goto 循环末尾;
             }
             fclose(f);
         }
-        else if (!strcmp(zfcs[0], "pasv"))
+        else if (!strcmp(字符串数[0], "pasv"))
         {
-            // char *hfzfc = realloc(NULL, 5 + strlen(dqgzml));
-            // memcpy(hfzfc, "227 ", 4);
-            char hfzfc[100] = {0};
-            if (!csms)
+            // char *回复字符串 = realloc(NULL, 5 + strlen(当前工作目录));
+            // memcpy(回复字符串, "227 ", 4);
+            char 回复字符串[100] = {0};
+            if (!传输模式)
             {
-                csms = 1;
-                // cslj(被动模式)
-                if (bind(sock2, (struct sockaddr *)&csd, sizeof(csd)) == -1)
+                传输模式 = 1;
+                // 传输连接(被动模式)
+                if (bind(sock2, (struct sockaddr *)&传输端, sizeof(传输端)) == -1)
                 {
-                    perror("csdk套接字绑定出错");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("传输端口套接字绑定出错");
+                    结束循环 = 1;
+                    goto 循环末尾;
                 }
                 if (listen(sock2, 10) == -1)
                 {
-                    perror("csdk套接字监听出错");
-                    jsxh = 1;
-                    goto xhmw;
+                    perror("传输端口套接字监听出错");
+                    结束循环 = 1;
+                    goto 循环末尾;
                 }
             }
-            struct sockaddr_in lsbl;
-            getsockname(sock, (struct sockaddr *)&lsbl, &csdlen);
-            char *ipdz = inet_ntoa(lsbl.sin_addr);
-            getsockname(sock2, (struct sockaddr *)&lsbl, &csdlen);
-            // char ipdz[16] = {0};
-            // strcpy(ipdz, 本机IPdz);
-            // strcpy(ipdz, inet_ntoa(*(struct in_addr *)(gethostbyname(s))));
-            for (int i = 0; i < strlen(ipdz); i++)
-                if (ipdz[i] == '.')
-                    ipdz[i] = ',';
-            // getsockname(sock2, (struct sockaddr*)&csd, &csdlen);
-            int dkhjdhdcd = 1;
-            int dkhgwzj = ntohs(lsbl.sin_port) / 256;
-            if (dkhgwzj < 10)
-                dkhjdhdcd += 1;
-            else if (dkhgwzj < 100)
-                dkhjdhdcd += 2;
+            struct sockaddr_in 临时变量;
+            getsockname(sock, (struct sockaddr *)&临时变量, &传输端len);
+            char *ip地址 = inet_ntoa(临时变量.sin_addr);
+            getsockname(sock2, (struct sockaddr *)&临时变量, &传输端len);
+            // char ip地址[16] = {0};
+            // strcpy(ip地址, 本机IP地址);
+            // strcpy(ip地址, inet_ntoa(*(struct in_addr *)(gethostbyname(s))));
+            for (int i = 0; i < strlen(ip地址); i++)
+                if (ip地址[i] == '.')
+                    ip地址[i] = ',';
+            // getsockname(sock2, (struct sockaddr*)&传输端, &传输端len);
+            int 端口号加斗号的长度 = 1;
+            int 端口号高位字节 = ntohs(临时变量.sin_port) / 256;
+            if (端口号高位字节 < 10)
+                端口号加斗号的长度 += 1;
+            else if (端口号高位字节 < 100)
+                端口号加斗号的长度 += 2;
             else
-                dkhjdhdcd += 3;
-            int dkhdwzj = ntohs(lsbl.sin_port) % 256;
-            if (dkhdwzj < 10)
-                dkhjdhdcd += 1;
-            else if (dkhdwzj < 100)
-                dkhjdhdcd += 2;
+                端口号加斗号的长度 += 3;
+            int 端口号低位字节 = ntohs(临时变量.sin_port) % 256;
+            if (端口号低位字节 < 10)
+                端口号加斗号的长度 += 1;
+            else if (端口号低位字节 < 100)
+                端口号加斗号的长度 += 2;
             else
-                dkhjdhdcd += 3;
-            // char *hfzfc = realloc(NULL, 9 + strlen(ipdz) + dkhjdhdcd);
-            sprintf(hfzfc, "227 Entering Passive Mode (%s,%d,%d).\r\n", ipdz, dkhgwzj, dkhdwzj);
-            // memcpy(&hfzfc[5], ipdz, strlen(ipdz));
-            // sprintf(&hfzfc[5 + strlen(ipdz)], ",%d,%d", dkhgwzj, dkhdwzj);
-            // memcpy(&hfzfc[6 + dkhjdhdcd + strlen(ipdz)], ").\r\n", 3);
-            // printf("%d", ntohs(csd.sin_port));
-            // printf(hfzfc);
-            // printf(inet_ntoa(csd.sin_addr));
-            if (send(sock, hfzfc, strlen(hfzfc), 0) == -1)
+                端口号加斗号的长度 += 3;
+            // char *回复字符串 = realloc(NULL, 9 + strlen(ip地址) + 端口号加斗号的长度);
+            sprintf(回复字符串, "227 Entering Passive Mode (%s,%d,%d).\r\n", ip地址, 端口号高位字节, 端口号低位字节);
+            // memcpy(&回复字符串[5], ip地址, strlen(ip地址));
+            // sprintf(&回复字符串[5 + strlen(ip地址)], ",%d,%d", 端口号高位字节, 端口号低位字节);
+            // memcpy(&回复字符串[6 + 端口号加斗号的长度 + strlen(ip地址)], ").\r\n", 3);
+            // printf("%d", ntohs(传输端.sin_port));
+            // printf(回复字符串);
+            // printf(inet_ntoa(传输端.sin_addr));
+            if (send(sock, 回复字符串, strlen(回复字符串), 0) == -1)
             {
-                perror("kzdkfscw(if (send(*(int*)num1, hfzfc, 8 + strlen(ipdz) + dkhjdhdcd, 0) == -1))");
-                jsxh = 1;
+                perror("控制端口发送错误（if (send(*(int*)num1, 回复字符串, 8 + strlen(ip地址) + 端口号加斗号的长度, 0) == -1)）");
+                结束循环 = 1;
             }
-            // free(ipdz);
-            // free(hfzfc);
-            // pthread_t xcID;
-            // pthread_create(xcID, NULL, cslj, &sock3);
+            // free(ip地址);
+            // free(回复字符串);
+            // pthread_t 线程ID;
+            // pthread_create(线程ID, NULL, 传输连接, &sock3);
         }
-        else if (!strcmp(zfcs[0], "port"))
+        else if (!strcmp(字符串数[0], "port"))
         {
             // if (send((int )num1, "202 fsdfaf\r\n", 12, 0) == -1)
             // {
-            //     perror("kzdkfscw(202 fsdfaf\r\n)");
+            //     perror("控制端口发送错误(202 fsdfaf\r\n)");
             //     break;
             // }
             // send(sock, "227 Entering Passive Mode (66,103,214,195,0,22).\r\n", 50, 0);
-            // goto xhmw;
-            // if (csms)
+            // goto 循环末尾;
+            // if (传输模式)
             // {
-            csms = 0;
+            传输模式 = 0;
             //     close(sock2);
             //     if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1)
             //     {
-            //         perror("csdk套接字cj出错-----(if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1))");
-            //         jsxh = 1;
-            //         goto xhmw;
+            //         perror("传输端口套接字创建出错-----（if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1)）");
+            //         结束循环 = 1;
+            //         goto 循环末尾;
             //     }
             // }
-            unsigned char ipdz[4];
-            int dk[2];
-            char dfsjzipdz[12];
-            sscanf(zfcs[1], "%d,%d,%d,%d,%d,%d", &ipdz[0], &ipdz[1], &ipdz[2], &ipdz[3], &dk[0], &dk[1]);
-            sprintf(dfsjzipdz, "%d.%d.%d.%d", ipdz[0], ipdz[1], ipdz[2], ipdz[3]);
-            csd.sin_addr.s_addr = inet_addr((const char *)&dfsjzipdz);
-            csd.sin_port = htons(dk[0] * 256 + dk[1]);
-            // for (int i = 0, j = 0,y=0; i < strlen(zfcs[1]); i++)
+            unsigned char ip地址[4];
+            int 端口[2];
+            char 点分十进制ip地址[12];
+            sscanf(字符串数[1], "%d,%d,%d,%d,%d,%d", &ip地址[0], &ip地址[1], &ip地址[2], &ip地址[3], &端口[0], &端口[1]);
+            sprintf(点分十进制ip地址, "%d.%d.%d.%d", ip地址[0], ip地址[1], ip地址[2], ip地址[3]);
+            传输端.sin_addr.s_addr = inet_addr((const char *)&点分十进制ip地址);
+            传输端.sin_port = htons(端口[0] * 256 + 端口[1]);
+            // for (int i = 0, j = 0,y=0; i < strlen(字符串数[1]); i++)
             // {
             //     char *num = realloc(NULL, j + 1);
-            //     if (zfcs[1][i] == ','){
-            //         ipdz_dk = realloc(ipdz_dk, y+1);
-            //         ipdz_dk[y] = num;
+            //     if (字符串数[1][i] == ','){
+            //         ip地址_端口 = realloc(ip地址_端口, y+1);
+            //         ip地址_端口[y] = num;
             //         y++;
             //         j=0;
             //         continue;
             //     }
-            //     num[i] = zfcs[1][i];
+            //     num[i] = 字符串数[1][i];
             //     j++;
             // }
             // char
             if (send(sock, "200 fsdfaf\r\n", 12, 0) == -1)
             {
-                perror("kzdkfscw(200 fsdfaf\r\n)");
-                jsxh = 1;
+                perror("控制端口发送错误(200 fsdfaf\r\n)");
+                结束循环 = 1;
             }
         }
-        else if (!strcmp(zfcs[0], "list"))
+        else if (!strcmp(字符串数[0], "list"))
         {
-            // char *hfzfc = realloc(NULL, 5 + strlen(dqgzml));
-            // memcpy(hfzfc, "227 ", 4);
+            // char *回复字符串 = realloc(NULL, 5 + strlen(当前工作目录));
+            // memcpy(回复字符串, "227 ", 4);
             int num = 1;
-            pthread_t xcID;
-            struct csljcs cs = {0};
-            cs.sock = sock2;
-            cs.csnr = zfcs[0];
-            cs.cssfzd = 0;
-            cs.csms = csms;
-            strcpy(cs.cslx, cslx);
-            if (mlcss < 2 || (zfcs[1][0] == '-' && mlcss < 3))
-                strcpy(cs.dqgzml, dqgzml);
+            pthread_t 线程ID;
+            struct 传输连接参数 参数 = {0};
+            参数.sock = sock2;
+            参数.传输内容 = 字符串数[0];
+            参数.传输是否中断 = 0;
+            参数.传输模式 = 传输模式;
+            strcpy(参数.传输类型, 传输类型);
+            if (命令参数数 < 2 || (字符串数[1][0] == '-' && 命令参数数 < 3))
+                strcpy(参数.当前工作目录, 当前工作目录);
             else
             {
-                if (zfcs[1][0] == '-')
+                if (字符串数[1][0] == '-')
                 {
                     num++;
                 }
-                if (zfcs[num][0] == '/')
+                if (字符串数[num][0] == '/')
                 {
-                    strcpy(cs.dqgzml, zfcs[num]);
-                    for (int j = num + 1; j < mlcss; j++)
+                    strcpy(参数.当前工作目录, 字符串数[num]);
+                    for (int j = num + 1; j < 命令参数数; j++)
                     {
-                        sprintf(&cs.dqgzml[strlen(cs.dqgzml)], " %s", zfcs[j]);
+                        sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], " %s", 字符串数[j]);
                     }
                 }
                 else
                 {
-                    strcpy(cs.dqgzml, dqgzml);
-                    if (cs.dqgzml[strlen(cs.dqgzml) - 1] == '/')
+                    strcpy(参数.当前工作目录, 当前工作目录);
+                    if (参数.当前工作目录[strlen(参数.当前工作目录) - 1] == '/')
                     {
-                        sprintf(&cs.dqgzml[strlen(cs.dqgzml)], "%s", zfcs[num]);
+                        sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], "%s", 字符串数[num]);
                     }
                     else
-                        sprintf(&cs.dqgzml[strlen(cs.dqgzml)], "/%s", zfcs[num]);
-                    for (int j = num + 1; j < mlcss; j++)
+                        sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], "/%s", 字符串数[num]);
+                    for (int j = num + 1; j < 命令参数数; j++)
                     {
-                        sprintf(&cs.dqgzml[strlen(cs.dqgzml)], " %s", zfcs[j]);
+                        sprintf(&参数.当前工作目录[strlen(参数.当前工作目录)], " %s", 字符串数[j]);
                     }
                 }
             }
-            cs.dqgzmllen = strlen(cs.dqgzml);
-            cs.csd = csd;
-            cs.csdlen = csdlen;
-            pthread_create(&xcID, NULL, cslj, &cs);
+            参数.当前工作目录len = strlen(参数.当前工作目录);
+            参数.传输端 = 传输端;
+            参数.传输端len = 传输端len;
+            pthread_create(&线程ID, NULL, 传输连接, &参数);
             if (send(sock, "125 Data connection already open; transfer starting.\r\n", 54, 0) == -1)
             {
-                perror("kzdkfscw(125 File status okay; about to open data connection.\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（125 File status okay; about to open data connection.\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
             // printf("asdad");
 
@@ -950,66 +950,66 @@ void *kzlj(void *num1)
             //     perror("");
             //     exit(1);
             // }
-            int csljfhz;
-            pthread_join(xcID, (void **)&csljfhz);
+            int 传输连接返回值;
+            pthread_join(线程ID, (void **)&传输连接返回值);
             // close(sock2);
             // if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1)
             // {
-            //     perror("csdk套接字cj出错(if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1))");
+            //     perror("传输端口套接字创建出错（if ((sock2 = socket(AF_INET, SOCK_STREAM, 0)) == -1)）");
             //     break;
             // }
             if (send(sock, "226  Transfer complete.\r\n", 25, 0) == -1)
             {
-                perror("kzdkfscw(226 fsdfaf\r\n)");
-                jsxh = 1;
+                perror("控制端口发送错误(226 fsdfaf\r\n)");
+                结束循环 = 1;
             }
-            // DIR *ml流 = opendir(dqgzml);
+            // DIR *目录流 = opendir(当前工作目录);
             // struct stat num;
-            // stat(dqgzml, &num);
+            // stat(当前工作目录, &num);
         }
-        else if (!strcmp(zfcs[0], "noop"))
+        else if (!strcmp(字符串数[0], "noop"))
         {
             if (send(sock, "200 Command NOOP okay.\r\n", 24, 0) == -1)
             {
-                perror("kzdkfscw(200 Command NOOP okay.\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误(200 Command NOOP okay.\r\n)");
+                结束循环 = 1;
+                goto 循环末尾;
             }
         }
-        else if (!strcmp(zfcs[0], "quit"))
+        else if (!strcmp(字符串数[0], "quit"))
         {
-            // char *hfzfc = realloc(NULL, 5 + strlen(dqgzml));
-            // memcpy(hfzfc, "227 ", 4);
+            // char *回复字符串 = realloc(NULL, 5 + strlen(当前工作目录));
+            // memcpy(回复字符串, "227 ", 4);
             if (send(sock, "221 srsaer\r\n", 12, 0) == -1)
             {
-                perror("kzdkfscw(221 srsaer\r\n)");
-                jsxh = 1;
-                goto xhmw;
+                perror("控制端口发送错误（221 srsaer\r\n）");
+                结束循环 = 1;
+                goto 循环末尾;
             }
-            jsxh = 1;
-            goto xhmw;
+            结束循环 = 1;
+            goto 循环末尾;
         }
         else
         {
             if (send(sock, "500 gtuii7\r\n", 12, 0) == -1)
             {
-                perror("kzdkfscw(500 gtuii7\r\n)");
-                jsxh = 1;
+                perror("控制端口发送错误（500 gtuii7\r\n）");
+                结束循环 = 1;
             }
         }
-    // pthread_create(&xcID, NULL, kzlj, &*((struct num*)*(int*)num1)->sock);
+    // pthread_create(&线程ID, NULL, 控制连接, &*((struct num*)*(int*)num1)->sock);
     // sleep(1);
-    xhmw:
-        printf("%smlzxwc\n", zfcs[0]);
+    循环末尾:
+        printf("%s命令执行完成\n", 字符串数[0]);
         // printf("释放内存\n");
-        for (int i = 0; i < mlcss; i++)
+        for (int i = 0; i < 命令参数数; i++)
         {
-            free(zfcs[i]);
+            free(字符串数[i]);
         }
-        // zfcs内存是否y释放 = 1;
-        printf("%d\n", jsxh);
+        // 字符串数内存是否已释放 = 1;
+        printf("%d\n", 结束循环);
     }
-    free(zfcs);
+    free(字符串数);
     // char s[100] = {0};
     // while (1)
     // {
@@ -1018,81 +1018,95 @@ void *kzlj(void *num1)
     //         perror("");
     //         exit(1);
     //     }
-    //     char **zfcs = realloc(NULL, 0);
+    //     char **字符串数 = realloc(NULL, 0);
     //     for (int i = -1, z = 1; s[i] != '\r\n'; z++)
     //     {
     //         i++;
-    //         char *zfc = realloc(NULL, 1);
+    //         char *字符串 = realloc(NULL, 1);
     //         for (int j = 0; s[i] != ' ' && s[i] != '\r\n'; j++, i++)
     //         {
-    //             zfc = realloc(zfc, j + 2);
-    //             zfc[j] = s[i];
+    //             字符串 = realloc(字符串, j + 2);
+    //             字符串[j] = s[i];
     //         }
-    //         zfcs = realloc(zfcs, sizeof(char *) * z);
-    //         zfcs[z - 1] = zfc;
-    //         // num[0]=zfc;
-    //         free(zfc);
+    //         字符串数 = realloc(字符串数, sizeof(char *) * z);
+    //         字符串数[z - 1] = 字符串;
+    //         // num[0]=字符串;
+    //         free(字符串);
     //     }
-    //     // free(zfcs);
+    //     // free(字符串数);
     //     // char strd[2] = {0};
     //     // if (recv(((struct asdfg *)num)->*((struct num*)*(int*)num1)->sock, strd, 2, 0) == -1)
     //     // {
     //     //     perror("");
     //     // }
-    // if (!zfcs内存是否y释放)
+    // if (!字符串数内存是否已释放)
     // {
     //     printf("释放内存--------\n");
-    //     for (int i = 0; i < sizeof(zfcs) / sizeof(char **); i++)
+    //     for (int i = 0; i < sizeof(字符串数) / sizeof(char **); i++)
     //     {
-    //         free(zfcs[i]);
+    //         free(字符串数[i]);
     //     }
-    //     free(zfcs);
+    //     free(字符串数);
     // }
     close(sock2);
     close(sock);
-    printf("tckzlj\n");
-    int fhz = 0;
-    pthread_exit(&fhz);
+    printf("退出控制连接\n");
+    int 返回值 = 0;
+    pthread_exit(&返回值);
 }
-int main()
+int main(int 命令行参数个数, char* 命令行参数[])
 {
-    printf("ks\n");
+    printf("开始\n");
     // seteuid(0);
     // char *对应字符 = "0123456789";
-    struct sockaddr_in mld;
-    mld.sin_addr.s_addr = 0x0;
-    mld.sin_port = htons(2234);
-    mld.sin_family = AF_INET;
-    int mldlen = sizeof(mld);
+    struct sockaddr_in 命令端;
+    命令端.sin_addr.s_addr = 0x0;
+    命令端.sin_port = htons(2235);
+    命令端.sin_family = AF_INET;
+    int 命令端len = sizeof(命令端);
 
-    // kzlj
+    if (命令行参数个数){
+        // printf("开始\n");
+        for (int i = 0;i < 命令行参数个数;i++){
+        printf("%s\n", 命令行参数[i]);
+        char* num;
+        if (num = strstr(命令行参数[i], "port=")){
+            // printf("开始\n");
+            // printf("%s\n", num);
+            命令端.sin_port = htons(atoi(num+5));
+            printf("端口被设置为%s\n", num+5);
+        }
+        // 命令端.sin_port = htons(atoi(命令行参数[0]));
+        }
+    }
+    // 控制连接
     int sock;
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) == -1)
     {
-        perror("kzdk套接字cjcw");
+        perror("控制端口套接字创建错误");
         exit(1);
     }
-    if (bind(sock, (struct sockaddr *)&mld, sizeof(mld)) == -1)
+    if (bind(sock, (struct sockaddr *)&命令端, sizeof(命令端)) == -1)
     {
-        perror("kzdk套接字绑定cw");
+        perror("控制端口套接字绑定错误");
         exit(1);
     }
     if (listen(sock, 10) == -1)
     {
-        perror("kzdk监听cw");
+        perror("控制端口监听错误");
         exit(1);
     }
     int sock1;
-    pthread_t xcID;
+    pthread_t 线程ID;
     while (1)
     {
-        if ((sock1 = accept(sock, (struct sockaddr *)&mld, &mldlen)) == -1)
+        if ((sock1 = accept(sock, (struct sockaddr *)&命令端, &命令端len)) == -1)
         {
-            perror("kzdkaccept()函数cw");
+            perror("控制端口accept()函数错误");
             exit(1);
         }
-        // struct num cs = {sock1, 对应字符};
-        pthread_create(&xcID, NULL, kzlj, (void *)sock1);
+        // struct num 参数 = {sock1, 对应字符};
+        pthread_create(&线程ID, NULL, 控制连接, (void *)sock1);
     }
 
     // if (recv(sock1, image, sizeof(XImage), 0) == -1)
@@ -1111,6 +1125,6 @@ int main()
     //             exit(1);
     //         }
     //         }
-    printf("tc主函数\n");
+    printf("退出主函数\n");
     return 0;
 }

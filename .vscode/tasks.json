@@ -9,7 +9,6 @@
                 "-g",
                 "${file}",
                 "-o",
-                // "--static",
                 "${fileDirname}/${fileBasenameNoExtension}"
             ],
             "options": {
@@ -23,6 +22,7 @@
                 "isDefault": true
             },
             "detail": "调试器生成的任务。"
+            
         }
     ],
     "version": "2.0.0"
